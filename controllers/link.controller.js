@@ -196,6 +196,14 @@ exports.deleteSublink = async (req, res) => {
       return res.redirect("/hab/admin/links");
     }
     let sublinks = link.sublinks;
+    for (var i = 0; i < sublinks.length; i++) {
+      if (sublinks[i].id == sublink_id) {
+        if (sublinks[i].url.indexOf("https") == -1) {
+          fs.unlinkSync(`uploads/link_pdf/${sublinks[i].url}`);
+        }
+        break;
+      }
+    }
     sublinks = sublinks.filter((sublink) => sublink.id != sublink_id);
     link.sublinks = sublinks;
     await link.save();
