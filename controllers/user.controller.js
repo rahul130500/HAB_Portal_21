@@ -8,6 +8,8 @@ const Category = require("../models/category");
 const Link = require("../models/link");
 const Ordinance = require("../models/ordinance");
 const About = require("../models/about");
+const { ConnectionStates } = require("mongoose");
+const fs = require("fs");
 
 exports.getHome = async (req, res) => {
   let notices = await Notice.find({}).sort("-creation");
@@ -57,6 +59,31 @@ exports.getOneHostel = async (req, res) => {
     return res.render("home/hostels/hostel", { members, hostel, hostels });
   } catch (error) {
     console.log(error.message);
+    return res.redirect("/hab");
+  }
+};
+
+exports.getOneLink = async (req, res) => {
+  try {
+    const linkid = req.params.link_id;
+    const subid = req.params.sublink_id;
+    const link = await Link.findById(linkid);
+    console.log(link);
+    var filepath;
+    for (var i = 0; i < link.sublinks.length; i++) {
+      if (link.sublinks[i].id == subid) {
+        filepath = link.sublinks[i].url;
+        break;
+      }
+    }
+    console.log(filepath);
+    const filePath1 = "uploads/link_pdf/" + filepath;
+    fs.readFile(filePath1, (err, data) => {
+      res.contentType("application/pdf");
+      return res.send(data);
+    });
+  } catch (error) {
+    console.log(error);
     return res.redirect("/hab");
   }
 };

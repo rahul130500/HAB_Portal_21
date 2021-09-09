@@ -1,4 +1,5 @@
 const Link = require("../models/link");
+const fs = require("fs");
 
 exports.getAllLinks = async (req, res) => {
   try {
@@ -108,11 +109,12 @@ exports.postSublink = async (req, res) => {
     const link_id = req.params.link_id;
     const { name, url, priority_number } = req.body;
     const link = await Link.findById(link_id);
+    const path = req.file ? req.file.filename : url;
     if (!link) {
       req.flash("error", "Cannot find this link");
       return res.redirect("/hab/admin/links");
     }
-    const sublink = { name, url, priority_number };
+    const sublink = { name, url: path, priority_number };
     let newSublink = link.sublinks.create(sublink);
     //console.log(newSublink);
     link.sublinks.push(newSublink);
@@ -157,7 +159,7 @@ exports.editSublink = async (req, res) => {
     const link_id = req.params.link_id;
     const sublink_id = req.params.sublink_id;
     const { name, url, priority_number } = req.body;
-
+    const path = req.file ? req.file.filename : url;
     const link = await Link.findById(link_id);
 
     if (!link) {
@@ -170,7 +172,7 @@ exports.editSublink = async (req, res) => {
     sublinks.forEach((sublink) => {
       if (sublink.id === sublink_id) {
         sublink.name = name;
-        sublink.url = url;
+        sublink.url = path;
         sublink.priority_number = priority_number;
       }
     });
@@ -204,6 +206,30 @@ exports.deleteSublink = async (req, res) => {
   }
 };
 
+exports.getSublink = async (req, res) => {
+  try {
+    console.log("cool");
+    const id = req.params.link_id;
+    const subid = req.params.sublink_id;
+    const notice = await Link.findById(id);
+    console.log(notice.sublinks);
+    var filepath;
+    for (var i = 0; i < notice.sublinks.length; i++) {
+      if (notice.sublinks[i]._id == subid) {
+        filepath = notice.sublinks[i].url;
+        break;
+      }
+    }
+    const filePath1 = "uploads/link_pdf/" + filepath;
+    console.log(filePath1);
+    fs.readFile(filePath1, (err, data) => {
+      res.contentType("application/pdf");
+      return res.send(data);
+    });
+  } catch (error) {
+    console.log(error.message);
+  }
+};
 const compare = (a, b) => {
   //console.log(a, b);
   return a.priority_number - b.priority_number;

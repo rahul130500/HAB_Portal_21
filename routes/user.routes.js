@@ -11,5 +11,6 @@ router.get("/notices/:notice_id", noticeController.getOneNotice);
 router.get("/ordinances/:ordinance_id", ordinanceController.getOneOrdinance);
 router.get("/forms/:id", formController.getOneForm);
 router.get("/hostels/:hostel_id", userController.getOneHostel);
+router.get("/links/:link_id/:sublink_id", userController.getOneLink);
 
 module.exports = router;
